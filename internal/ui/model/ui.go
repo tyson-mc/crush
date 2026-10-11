@@ -1132,7 +1132,7 @@ func (m *UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, cmd)
 		}
 		if cmd := m.sendNotification(notification.Notification{
-			Title:   "Crush is waiting...",
+			Title:   "BertBud is waiting...",
 			Message: fmt.Sprintf("Permission required to execute \"%s\"", msg.Payload.ToolName),
 		}); cmd != nil {
 			cmds = append(cmds, cmd)
@@ -1143,7 +1143,7 @@ func (m *UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.openBatchFormDialog(msg.Payload)
 		m.chat.ScrollToBottom()
 		if cmd := m.sendNotification(notification.Notification{
-			Title:   "Crush is waiting...",
+			Title:   "BertBud is waiting...",
 			Message: fmt.Sprintf("%d questions need your input", len(msg.Payload.Questions)),
 		}); cmd != nil {
 			cmds = append(cmds, cmd)
@@ -4728,7 +4728,7 @@ func (m *UI) switchPlanToYolo() tea.Cmd {
 
 // Mode banner copy shown in the status bar after switching modes.
 const (
-	planModeBannerMsg = "Plan with Crush before generating any code."
+	planModeBannerMsg = "Plan with BertBud before generating any code."
 	yoloModeBannerMsg = "Skip permission prompts. System level commands will be blocked."
 )
 
@@ -5806,7 +5806,7 @@ func (m *UI) handleAgentNotification(n notify.Notification) tea.Cmd {
 		common.StopTurn()
 		m.turnOutcome = tea.ProgramStateDone
 		cmds = append(cmds, m.sendNotification(notification.Notification{
-			Title:   "Crush is waiting...",
+			Title:   "BertBud is waiting...",
 			Message: fmt.Sprintf("Agent's turn completed in \"%s\"", n.SessionTitle),
 		}))
 		// Show what the stored balance says right away, and fetch again:

@@ -1,10 +1,9 @@
-// Package logo renders a Crush wordmark in a stylized way.
+// Package logo renders the BertBud wordmark in a stylized way.
 package logo
 
 import (
 	"fmt"
 	"image/color"
-	"math/rand/v2"
 	"strings"
 
 	"charm.land/lipgloss/v2"
@@ -18,71 +17,45 @@ type letterform func(bool) string
 
 const diag = `╱`
 
-// Opts are the options for rendering the Crush title art.
+// brandMark sits where upstream Crush prints "Charm™".
+const brandMark = "✦"
+
+// Opts are the options for rendering the BertBud title art.
 type Opts struct {
 	FieldColor   color.Color // diagonal lines
 	TitleColorA  color.Color // left gradient ramp point
 	TitleColorB  color.Color // right gradient ramp point
-	CharmColor   color.Color // Charm™ text color
+	CharmColor   color.Color // brand mark (✦) color
 	VersionColor color.Color // version text color
 	Width        int         // width of the rendered logo, used for truncation
-	Hyper        bool        // whether it is Crush or Hypercrush
+	Hyper        bool        // ignored: BertBud has no Hypercrush variant
 
-	// When true, stretch a random letterform on each render. Has no effect in
-	// compact mode. Mainly for testing. In production you will want to cache
-	// the stretched letterform to keep the logo from jittering on resize.
+	// Ignored: the BertBud wordmark never stretches a letterform.
 	Unstable bool
 }
 
-// Render renders the Crush logo. Set the argument to true to render the narrow
+// Render renders the BertBud logo. Set the argument to true to render the narrow
 // version, intended for use in a sidebar.
 //
 // The compact argument determines whether it renders compact for the sidebar
 // or wider for the main pane.
 func Render(base lipgloss.Style, version string, compact bool, o Opts) string {
-	charm := "Charm™"
-	if !o.Hyper {
-		charm = " " + charm
-	}
+	charm := brandMark
 
 	fg := func(c color.Color, s string) string {
 		return lipgloss.NewStyle().Foreground(c).Render(s)
 	}
 
-	// Title.
+	// Title. The narrow version stacks BERT over BUD to fit the sidebar.
 	const spacing = 1
-	var hyperLetterforms []letterform
-	if o.Hyper {
-		hyperLetterforms = []letterform{
-			LetterH,
-			LetterYAlt,
-			LetterP,
-			LetterE,
-			LetterR,
-		}
-	}
-	crushLetterforms := []letterform{
-		LetterC,
-		LetterR,
-		LetterU,
-		LetterSAlt,
-		LetterH,
-	}
-	if o.Hyper && !compact {
-		crushLetterforms = append(hyperLetterforms, crushLetterforms...)
-	}
+	bertLetterforms := []letterform{LetterB, LetterE, LetterR, LetterT}
+	budLetterforms := []letterform{LetterB, LetterU, LetterD}
+	crushLetterforms := append(append([]letterform{}, bertLetterforms...), budLetterforms...)
 
-	stretchIndex := -1 // -1 means no stretching.
-	if !compact && !o.Unstable {
-		// Always stretch the same letterform, which is picked once at random.
-		stretchIndex = cachedRandN(len(crushLetterforms))
-	} else if !compact && o.Unstable {
-		// Stretch a random letterform on every render.
-		stretchIndex = rand.IntN(len(crushLetterforms))
-	}
-	crush := renderWord(spacing, stretchIndex, crushLetterforms...)
-	if o.Hyper && compact {
-		crush = renderWord(spacing, stretchIndex, hyperLetterforms...) + "\n" + crush
+	// Upstream stretches one random letterform; BERTBUD reads better without.
+	crush := renderWord(spacing, -1, crushLetterforms...)
+	if compact {
+		crush = renderWord(spacing, -1, bertLetterforms...) + "\n" + renderWord(spacing, -1, budLetterforms...)
 	}
 	crushWidth := lipgloss.Width(crush)
 	b := new(strings.Builder)
@@ -95,16 +68,13 @@ func Render(base lipgloss.Style, version string, compact bool, o Opts) string {
 	metaRowGap := 1
 	maxVersionWidth := crushWidth - lipgloss.Width(charm) - metaRowGap
 	version = ansi.Truncate(version, maxVersionWidth, "…") // truncate version if too long.
-	if o.Hyper && compact {
-		version += " "
-	}
 	gap := max(0, crushWidth-lipgloss.Width(charm)-lipgloss.Width(version))
 	metaRow := fg(o.CharmColor, charm) + strings.Repeat(" ", gap) + fg(o.VersionColor, version)
 
-	// Join the meta row and big Crush title.
+	// Join the meta row and big BertBud title.
 	crush = strings.TrimSpace(metaRow + "\n" + crush)
 
-	// Narrow version. If this is Hypercrush, this is also a stacked version.
+	// Narrow version, stacked.
 	if compact {
 		field := fg(o.FieldColor, strings.Repeat(diag, crushWidth))
 		return strings.Join([]string{field, field, crush, field, ""}, "\n")
@@ -146,14 +116,11 @@ func Render(base lipgloss.Style, version string, compact bool, o Opts) string {
 	return logo
 }
 
-// SmallRender renders a smaller version of the Crush logo, suitable for
+// SmallRender renders a smaller version of the BertBud logo, suitable for
 // smaller windows or sidebar usage.
 func SmallRender(t *styles.Styles, width int, o Opts) string {
-	name := "Crush"
-	if o.Hyper {
-		name = "HYPERCRUSH"
-	}
-	charm := "Charm™"
+	name := "BertBud"
+	charm := brandMark
 	title := t.Logo.SmallCharm.Render(charm)
 	title = fmt.Sprintf("%s %s", title, styles.ApplyBoldForegroundGrad(t.Logo.GradCanvas, name, t.Logo.SmallGradFromColor, t.Logo.SmallGradToColor))
 	remainingWidth := width - lipgloss.Width(title) - 1 // 1 for the space after the name

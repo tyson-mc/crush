@@ -65,7 +65,7 @@ func logoSection(contentWidth int) string {
 	// Wrap the greeting and the message together: wrapping only the message
 	// leaves the greeting's own width unaccounted for and overflows the frame.
 	return crushLogo + "\n" +
-		lipgloss.NewStyle().Width(contentWidth).Render("Thanks for using Crush! "+randomExitMessage())
+		lipgloss.NewStyle().Width(contentWidth).Render("Thanks for using BertBud! "+randomExitMessage())
 }
 
 // sessionResumeLines returns the "Session  <title>\nContinue crush -s <hash>"
